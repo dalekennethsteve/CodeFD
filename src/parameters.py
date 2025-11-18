@@ -21,11 +21,13 @@ w = np.array([
 opposite = np.array([0, 3, 4, 1, 2, 7, 8, 5, 6])
 
 # Simulation parameters
-nx = 100    # length
-ny = 30     # breadth
+nx = 200    # length
+ny = 50     # breadth
 tau = 0.8   # relaxation time
 rho0 = 1.0  # initial density
-u0 = 0.05   # characteristic velocity
+
+# Body force parameters (drives the flow)
+body_force = np.array([5e-5, 0.0])  # force in x-direction
 
 # Derived parameters
 nu = (tau - 0.5) / 3.0  # kinematic viscosity

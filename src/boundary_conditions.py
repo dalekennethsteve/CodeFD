@@ -3,80 +3,75 @@ from parameters import *
 
 
 def apply_boundary_conditions(lb):
-    """Apply simplified boundary conditions"""
+    """Apply periodic boundary conditions in x-direction, bounce-back in y-direction"""
 
-    # Inlet (left boundary) - constant velocity profile
-    apply_inlet_velocity(lb)
+    # Apply periodic boundary conditions in x-direction
+    apply_periodic_x(lb)
 
-    # Outlet (right boundary) - constant pressure
-    apply_outlet_pressure(lb)
-
-    # Walls (top and bottom)
-    apply_wall_bounce_back(lb)
+    # Apply bounce-back at top and bottom walls
+    apply_zou_he_walls(lb)
 
 
-def apply_inlet_velocity(lb):
-    """Apply constant velocity at inlet"""
-    x = 0  # left boundary
-    u_in = 0.05  # inlet velocity
 
-    # Parabolic velocity profile for Poiseuille flow
-    for y in range(lb.ny):
-        if y == 0 or y == lb.ny - 1:  # walls
-            u_x = 0.0
-        else:
-            # Parabolic profile
-            u_x = u_in * 1.5 * (1 - ((y - lb.ny / 2) / (lb.ny / 2)) ** 2)
+def apply_periodic_x(lb):
+    """Apply periodic boundary conditions in x-direction"""
+    # Copy distribution functions from right to left boundary and vice versa
+    for i in range(Q):
+        # Left boundary (x=0) gets populations from right boundary (x=nx-1)
+        lb.f[i, 0, :] = lb.f[i, lb.nx - 1, :]
 
-        # Simple velocity boundary condition
-        lb.u[0, x, y] = u_x
-        lb.u[1, x, y] = 0.0
-        lb.rho[x, y] = rho0
-
-        # Recalculate equilibrium at boundary
-        for i in range(Q):
-            cu = c[i, 0] * lb.u[0, x, y] + c[i, 1] * lb.u[1, x, y]
-            u_sqr = lb.u[0, x, y] ** 2 + lb.u[1, x, y] ** 2
-            lb.f[i, x, y] = w[i] * lb.rho[x, y] * (1 + 3 * cu + 4.5 * cu ** 2 - 1.5 * u_sqr)
+        # Right boundary (x=nx-1) gets populations from left boundary (x=0)
+        lb.f[i, lb.nx - 1, :] = lb.f[i, 0, :]
 
 
-def apply_outlet_pressure(lb):
-    """Apply constant pressure at outlet"""
-    x = lb.nx - 1  # right boundary
+def apply_zou_he_walls(lb):
+    """Apply Zou-He boundary conditions at top and bottom walls"""
 
-    for y in range(lb.ny):
-        lb.rho[x, y] = rho0
-        # Extrapolate velocity from interior
-        if x > 0:
-            lb.u[0, x, y] = lb.u[0, x - 1, y]
-            lb.u[1, x, y] = lb.u[1, x - 1, y]
-
-        # Recalculate equilibrium at boundary
-        for i in range(Q):
-            cu = c[i, 0] * lb.u[0, x, y] + c[i, 1] * lb.u[1, x, y]
-            u_sqr = lb.u[0, x, y] ** 2 + lb.u[1, x, y] ** 2
-            lb.f[i, x, y] = w[i] * lb.rho[x, y] * (1 + 3 * cu + 4.5 * cu ** 2 - 1.5 * u_sqr)
-
-
-def apply_wall_bounce_back(lb):
-    """Apply bounce-back boundary conditions at top and bottom walls"""
-    # Bottom wall (y = 0)
+    # Bottom wall (y = 0) - no-slip
     for x in range(lb.nx):
-        # Store populations that hit the wall
-        lb.f[2, x, 0] = lb.f[4, x, 0]  # bounce back from bottom
-        lb.f[5, x, 0] = lb.f[7, x, 0]
-        lb.f[6, x, 0] = lb.f[8, x, 0]
+        # Known distributions after streaming
+        f0 = lb.f[0, x, 0]
+        f1 = lb.f[1, x, 0]
+        f3 = lb.f[3, x, 0]
+        f4 = lb.f[4, x, 0]  # coming from wall
+        f7 = lb.f[7, x, 0]
+        f8 = lb.f[8, x, 0]
 
-        # Set wall velocity to zero
-        lb.u[0, x, 0] = 0.0
-        lb.u[1, x, 0] = 0.0
+        # Wall velocity (no-slip)
+        ux_wall = 0.0
+        uy_wall = 0.0
 
-    # Top wall (y = lb.ny-1)
+        # Calculate density
+        rho = (f0 + f1 + f3 + 2 * (f4 + f7 + f8)) / (1 - uy_wall)
+
+        # Zou-He equations for unknown distributions
+        lb.f[2, x, 0] = f4 + (2 / 3) * rho * uy_wall  # f2
+        lb.f[5, x, 0] = f7 - 0.5 * (f1 - f3) + 0.5 * rho * ux_wall + (1 / 6) * rho * uy_wall  # f5
+        lb.f[6, x, 0] = f8 + 0.5 * (f1 - f3) - 0.5 * rho * ux_wall + (1 / 6) * rho * uy_wall  # f6
+
+        # Update macroscopic variables at boundary
+        lb.rho[x, 0] = rho
+        lb.u[0, x, 0] = ux_wall
+        lb.u[1, x, 0] = uy_wall
+
+    # Top wall (y = ny-1) - similar implementation
     for x in range(lb.nx):
-        lb.f[4, x, -1] = lb.f[2, x, -1]  # bounce back from top
-        lb.f[7, x, -1] = lb.f[5, x, -1]
-        lb.f[8, x, -1] = lb.f[6, x, -1]
+        f0 = lb.f[0, x, -1]
+        f1 = lb.f[1, x, -1]
+        f2 = lb.f[2, x, -1]  # coming from wall
+        f3 = lb.f[3, x, -1]
+        f5 = lb.f[5, x, -1]
+        f6 = lb.f[6, x, -1]
 
-        # Set wall velocity to zero
-        lb.u[0, x, -1] = 0.0
-        lb.u[1, x, -1] = 0.0
+        ux_wall = 0.0
+        uy_wall = 0.0
+
+        rho = (f0 + f1 + f3 + 2 * (f2 + f5 + f6)) / (1 + uy_wall)  # note sign change
+
+        lb.f[4, x, -1] = f2 - (2 / 3) * rho * uy_wall  # f4
+        lb.f[7, x, -1] = f5 + 0.5 * (f1 - f3) - 0.5 * rho * ux_wall - (1 / 6) * rho * uy_wall  # f7
+        lb.f[8, x, -1] = f6 - 0.5 * (f1 - f3) + 0.5 * rho * ux_wall - (1 / 6) * rho * uy_wall  # f8
+
+        lb.rho[x, -1] = rho
+        lb.u[0, x, -1] = ux_wall
+        lb.u[1, x, -1] = uy_wall
