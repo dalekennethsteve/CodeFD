@@ -3,7 +3,6 @@ import time
 from lattice_boltzmann import LatticeBoltzmann
 from boundary_conditions import apply_boundary_conditions
 from parameters import tau, nu, body_force
-from src.utils import calculate_Reynoldsnumber
 from visualization import plot_velocity_field
 from utils import check_convergence
 
@@ -15,10 +14,10 @@ def main():
 
     # Simulation parameters
     total_steps = 10000
-    plot_interval = 500
+    plot_interval = 1000
     convergence_check_interval = 100
     convergence_tolerance = 1e-6
-    Re = calculate_Reynoldsnumber(lb)
+
 
     print(f"Running simulation for {total_steps} steps...")
 
@@ -76,7 +75,6 @@ def main():
     u_max = np.max(np.sqrt(lb.u[0] ** 2 + lb.u[1] ** 2))
     print(f"\nFinal statistics:")
     print(f"Maximum velocity: {u_max:.6f}")
-    print(f"Reynolds number: {Re:.2f}")
     print(f"Convergence status: {'Yes' if converged else 'No'}")
 
 

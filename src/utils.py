@@ -17,9 +17,3 @@ def check_convergence(current_u, previous_u, tolerance=1e-6):
 
     return converged, max_change
 
-
-def calculate_Reynoldsnumber(lb):
-    u_max = np.max(np.sqrt(lb.u[0]**2 + lb.u[1]**2))
-    L_char = lb.ny  # channel height excluding walls
-    nu = (tau - 0.5) / 3.0
-    return (u_max * L_char) / nu
