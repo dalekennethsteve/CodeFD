@@ -1,16 +1,20 @@
 import numpy as np
 import time
 from lattice_boltzmann import LatticeBoltzmann
-from boundary_conditions import apply_boundary_conditions
-from parameters import tau, nu, body_force
 from visualization import plot_velocity_field
 from utils import check_convergence
+from parameters import *
 
 
 def main():
     # Initialize LBM simulation
     print("Initializing LBM simulation with periodic boundary conditions...")
+    print(f"Cylinder at ({cylinder_x}, {cylinder_y}) with radius {cylinder_radius}")
     lb = LatticeBoltzmann()
+
+    # Count obstacle nodes
+    obstacle_nodes = np.sum(lb.obstacle)
+    print(f"Obstacle nodes: {obstacle_nodes}")
 
     # Simulation parameters
     total_steps = 10000
@@ -18,9 +22,7 @@ def main():
     convergence_check_interval = 100
     convergence_tolerance = 1e-6
 
-
     print(f"Running simulation for {total_steps} steps...")
-
 
     # Check initial conditions
     print(f"Initial max velocity: {np.max(np.abs(lb.u)):.6f}")
@@ -29,6 +31,7 @@ def main():
     start_time = time.time()
     converged = False
     final_step = total_steps
+    max_change = 0
 
     for step in range(total_steps):
         # Store previous velocity for convergence check
@@ -76,6 +79,7 @@ def main():
     print(f"\nFinal statistics:")
     print(f"Maximum velocity: {u_max:.6f}")
     print(f"Convergence status: {'Yes' if converged else 'No'}")
+    print(f"reynolds number: {Re:0.2f}")
 
 
 if __name__ == "__main__":

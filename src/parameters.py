@@ -1,3 +1,4 @@
+# parameters.py - Add cylinder parameters
 import numpy as np
 # Lattice parameters
 D = 2  # dimensions
@@ -17,20 +18,28 @@ w = np.array([
 opposite = np.array([0, 3, 4, 1, 2, 7, 8, 5, 6])
 
 # Simulation parameters
-nx = 250    # length
-ny = 50   # breadth
+nx = 300 # length
+ny = 62   # breadth
 tau = 0.8   # relaxation time
 rho0 = 1.0  # initial density
-u_in = 0.05
 # Body force parameter
-body_force = np.array([5e-5, 0.0])
+body_force = np.array([0.00001, 0.0])
 
 # Derived parameters
-nu = (tau - 0.5) / 3.0  # kinematic viscosity
+nu = 0.1     # kinematic viscosity (tau - 0.5) / 3.0
 omega = 1.0 / tau       # relaxation time
 
-# Calculate Reynolds number for information
-H = ny - 2  # channel height (excluding walls)
-Re = (u_in * H) / nu
+H = ny - 2
+F = body_force[0] / rho0
 
-print(f"Reynolds number: Re = {Re:.2f}")
+# Predicted maximum velocity:
+u_max_predicted = (F * H**2) / (8 * nu)
+
+# Reynolds number
+H = ny - 2  # channel height
+Re = (u_max_predicted * H) / nu
+
+# Cylinder parameters
+cylinder_radius = 4
+cylinder_x = nx // 4
+cylinder_y = ny // 2
