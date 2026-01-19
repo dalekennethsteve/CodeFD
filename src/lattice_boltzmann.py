@@ -20,13 +20,14 @@ class LatticeBoltzmann:
         self.initialize()
 
     def create_cylinder_mask(self):
-        """Create mask for cylinder nodes"""
-        for x in range(self.nx):
-            for y in range(self.ny):
-                dx = x - cylinder_x
-                dy = y - cylinder_y
-                if dx * dx + dy * dy <= cylinder_radius ** 2:
-                    self.obstacle[x, y] = True
+        """Create obstacle mask for multiple cylinders"""
+        for cx, cy in cylinders:
+            for x in range(self.nx):
+                for y in range(self.ny):
+                    dx = x - cx
+                    dy = y - cy
+                    if dx * dx + dy * dy <= cylinder_radius ** 2:
+                        self.obstacle[x, y] = True
 
     def initialize(self):
         """Initialize all fields"""

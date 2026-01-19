@@ -39,7 +39,11 @@ u_max_predicted = (F * H**2) / (8 * nu)
 H = ny - 2  # channel height
 Re = (u_max_predicted * H) / nu
 
-# Cylinder parameters
+# Cylinder parameters (multiple cylinders can be added)
 cylinder_radius = 4
-cylinder_x = nx // 4
-cylinder_y = ny // 2
+
+cylinders = [
+    (nx // 4,     ny // 2),        # Cylinder 1
+    (nx // 2,     ny // 2 + 10),   # Cylinder 2
+    (3 * nx // 4, ny // 2 - 10)    # Cylinder 3
+]
