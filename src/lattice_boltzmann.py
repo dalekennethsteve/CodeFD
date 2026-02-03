@@ -1,4 +1,3 @@
-# lattice_boltzmann.py - COMPLETELY CORRECTED
 import numpy as np
 from parameters import *
 from boundary_conditions import apply_boundary_conditions
@@ -13,19 +12,39 @@ class LatticeBoltzmann:
         self.rho = np.ones((nx, ny)) * rho0
         self.u = np.zeros((2, nx, ny))
 
-        # Create obstacle mask for cylinder
-        self.obstacle = np.zeros((nx, ny), dtype=bool)
-        self.create_cylinder_mask()
+        # Create obstacle mask - COMMENTED OUT FOR POISEUILLE FLOW
+        self.obstacle = np.zeros((nx, ny), dtype=bool)  # Still need obstacle array for code compatibility
+        #self.create_cylinder_mask()  # Circular object - COMMENTED OUT
+        self.create_square_mask()  # Commented out for later reuse
 
         self.initialize()
 
+    '''
     def create_cylinder_mask(self):
-        """Create mask for cylinder nodes"""
         for x in range(self.nx):
             for y in range(self.ny):
                 dx = x - cylinder_x
                 dy = y - cylinder_y
                 if dx * dx + dy * dy <= cylinder_radius ** 2:
+                    self.obstacle[x, y] = True'''''
+
+    def create_square_mask(self):
+        # Define square position and size
+        square_center_x = cylinder_x  # Using same center as original cylinder
+        square_center_y = cylinder_y
+        square_half_size = cylinder_radius  # Square "radius" (half of side length)
+
+        # Clear existing obstacle mask
+        self.obstacle[:, :] = False
+
+        for x in range(self.nx):
+            for y in range(self.ny):
+                # Check if point is inside square
+                dx = abs(x - square_center_x)
+                dy = abs(y - square_center_y)
+
+                # Square mask (axis-aligned)
+                if dx <= square_half_size and dy <= square_half_size:
                     self.obstacle[x, y] = True
 
     def initialize(self):
@@ -76,9 +95,9 @@ class LatticeBoltzmann:
 
             for x in range(self.nx):
                 for y in range(self.ny):
-                    # Skip obstacle nodes (nothing streams from them)
-                    if self.obstacle[x, y]:
-                        continue
+                    # Skip obstacle nodes (nothing streams from them) - BUT OBSTACLE ARRAY IS ALL FALSE
+                    '''if self.obstacle[x, y]:
+                        continue'''
 
                     # Calculate destination
                     x_new = (x + cx) % self.nx
@@ -86,12 +105,12 @@ class LatticeBoltzmann:
 
                     # If destination is valid
                     if 0 <= y_new < self.ny:
-                        if self.obstacle[x_new, y_new]:
+                        '''if self.obstacle[x_new, y_new]:
                             # BOUNCE BACK at cylinder
                             f_new[opp, x, y] = self.f[i, x, y]
-                        else:
-                            # Normal streaming
-                            f_new[i, x_new, y_new] = self.f[i, x, y]
+                        else:'''
+                        # Normal streaming (always since no obstacles)
+                        f_new[i, x_new, y_new] = self.f[i, x, y]
                     else:
                         # Destination is at wall - wall BC will handle
                         # For now, treat as bounce-back (simple approach)
@@ -106,7 +125,7 @@ class LatticeBoltzmann:
         self.rho = np.sum(self.f, axis=0)
 
         # IMPORTANT: Handle obstacle nodes separately
-        fluid_mask = ~self.obstacle
+        fluid_mask = ~self.obstacle  # This will be all True since obstacle array is all False
 
         # Calculate momentum
         mom_x = np.sum(self.f * c[:, 0].reshape(Q, 1, 1), axis=0)
@@ -116,7 +135,7 @@ class LatticeBoltzmann:
         self.u[0].fill(0.0)
         self.u[1].fill(0.0)
 
-        # Calculate velocities only for fluid nodes
+        # Calculate velocities only for fluid nodes (all nodes are fluid)
         if np.any(fluid_mask):
             rho_fluid = self.rho[fluid_mask]
 
@@ -127,10 +146,10 @@ class LatticeBoltzmann:
             self.u[0][fluid_mask] = (mom_x[fluid_mask] + 0.5 * body_force[0]) / rho_fluid
             self.u[1][fluid_mask] = (mom_y[fluid_mask] + 0.5 * body_force[1]) / rho_fluid
 
-        # Explicitly set obstacle nodes
-        self.u[0][self.obstacle] = 0.0
+        # Explicitly set obstacle nodes (none exist)
+        '''self.u[0][self.obstacle] = 0.0
         self.u[1][self.obstacle] = 0.0
-        self.rho[self.obstacle] = rho0  # Reset density at obstacles
+        self.rho[self.obstacle] = rho0  # Reset density at obstacles'''
 
     def collide(self):
         # Apply body force
@@ -145,9 +164,9 @@ class LatticeBoltzmann:
         # Collision: relax toward equilibrium
         self.f -= omega * (self.f - self.f_eq)
 
-        # Ensure distributions at obstacle nodes are zero
-        for i in range(Q):
-            self.f[i][self.obstacle] = 0.0
+        # Ensure distributions at obstacle nodes are zero (none exist)
+        '''for i in range(Q):
+            self.f[i][self.obstacle] = 0.0'''
 
     def step(self):
         """LBM step"""
@@ -158,5 +177,5 @@ class LatticeBoltzmann:
     def get_velocity_magnitude(self):
         """Get velocity magnitude for visualization"""
         velocity_magnitude = np.sqrt(self.u[0] ** 2 + self.u[1] ** 2)
-        velocity_magnitude[self.obstacle] = 0.0
+        # velocity_magnitude[self.obstacle] = 0.0  # No obstacles
         return velocity_magnitude
