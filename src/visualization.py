@@ -8,7 +8,7 @@ from src.parameters import cylinder_x, cylinder_y, cylinder_radius
 #from parameters import cylinder_x, cylinder_radius, cylinder_y
 
 
-'''def plot_velocity_field(lb, step, save_path=None):
+def plot_velocity_field(lb, step, save_path=None):
     """Plot velocity field"""
     plt.figure(figsize=(10, 5))
 
@@ -96,92 +96,8 @@ def plot_pressure_field(lb, step, save_path=None):
 
     plt.show(block=False)
     plt.pause(0.1)
-'''
 
 
-'''def plot_streamlines_with_velocity(lb, step, save_path=None):
-    plt.figure(figsize=(10, 5))
-
-    # Create meshgrid
-    X, Y = np.meshgrid(np.arange(lb.nx), np.arange(lb.ny), indexing='ij')
-
-    # Calculate velocity magnitude for colormap
-    velocity_magnitude = np.sqrt(lb.u[0] ** 2 + lb.u[1] ** 2)
-
-    # ===== SQUARE mask =====
-    # Define square side length
-    square_side = cylinder_radius * 2
-
-    # Calculate boundaries of square
-    square_left = cylinder_x - cylinder_radius
-    square_right = cylinder_x + cylinder_radius
-    square_bottom = cylinder_y - cylinder_radius
-    square_top = cylinder_y + cylinder_radius
-
-    # Create square mask (INSIDE the square only)
-    square_mask = ((X >= square_left) & (X <= square_right) &
-                   (Y >= square_bottom) & (Y <= square_top))
-
-    obstacle_mask = square_mask
-    # ================================================
-
-    # Create copies of velocities
-    u_masked = lb.u[0].copy()
-    v_masked = lb.u[1].copy()
-    vel_mag_masked = velocity_magnitude.copy()
-
-    # Set velocities to NaN INSIDE SQUARE ONLY (no buffer!)
-    u_masked[obstacle_mask] = np.nan
-    v_masked[obstacle_mask] = np.nan
-    vel_mag_masked[obstacle_mask] = np.nan
-
-    # ===== REMOVED: Buffer zone (this was causing white space) =====
-    # KEEP velocities around the square - this allows streamlines to flow around it
-
-    # Downsample for cleaner streamlines
-    skip = 2
-    X_ds = X[::skip, ::skip]
-    Y_ds = Y[::skip, ::skip]
-    u_ds = u_masked[::skip, ::skip]
-    v_ds = v_masked[::skip, ::skip]
-    vel_mag_ds = vel_mag_masked[::skip, ::skip]
-
-    # Plot streamlines colored by velocity magnitude
-    strm = plt.streamplot(X_ds.T, Y_ds.T, u_ds.T, v_ds.T,
-                          color=vel_mag_ds.T,
-                          cmap='jet',
-                          linewidth=1.0,
-                          density=2.5,  # Increased density for better coverage
-                          arrowsize=0.8,
-                          broken_streamlines=False,
-                          minlength=0.3,  # Minimum length of streamline segments
-                          maxlength=4.0)  # Maximum length
-
-    # Add SQUARE obstacle
-    square = Rectangle((square_left, square_bottom),
-                       square_side, square_side,
-                       linewidth=2, edgecolor='black', facecolor='gray',
-                       alpha=0.8)  # Changed to gray for better visibility
-    plt.gca().add_patch(square)
-
-    # Add colorbar for velocity magnitude
-    cbar = plt.colorbar(strm.lines, label='Velocity Magnitude')
-
-    plt.title(f'Streamlines with Velocity Magnitude - Step {step}')
-    plt.xlabel('X')
-    plt.ylabel('Y')
-    plt.axis('equal')
-
-    plt.tight_layout()
-
-    if save_path:
-        plt.savefig(f'{save_path}/streamlines_vel_step_{step:06d}.png', dpi=150, bbox_inches='tight')
-
-    plt.show(block=False)
-    plt.pause(0.1)
-
-
-# Combined velocity and streamlines plot - FIXED VERSION
 def plot_velocity_with_streamlines(lb, step, save_path=None):
     plt.figure(figsize=(10, 5))
 
@@ -249,7 +165,7 @@ def plot_velocity_with_streamlines(lb, step, save_path=None):
         plt.savefig(f'{save_path}/velocity_streamlines_step_{step:06d}.png', dpi=150, bbox_inches='tight')
 
     plt.show(block=False)
-    plt.pause(0.1)'''
+    plt.pause(0.1)
 
 
 

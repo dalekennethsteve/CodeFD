@@ -49,13 +49,12 @@ cs = 1/np.sqrt(3)
 '''
 PARAMETERS FOR SIMULATION OF FLOW PAST MULTIPLE CYLINDERS AND SQUARES
 
-# Square cylinder parameters
 cylinder_width = 8
 cylinder_type = 'square' 
 
 
 # Multiple squares (x_center, y_center)
-# Add as many squares as you like
+# Add as many squares or cylinders as you would like in the list below
 cylinders = [
     (nx // 4,     ny // 2),        # Square 1
     (nx // 2,     ny // 2 + 10),   # Square 2

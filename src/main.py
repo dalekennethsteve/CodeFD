@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 
 def main():
-    # Initialize LBM simulation
+    # Initializing LBM simulation
     print("Initializing LBM simulation...")
     lb = LatticeBoltzmann()
 
