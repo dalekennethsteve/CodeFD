@@ -6,12 +6,9 @@ The goal of this project is to explore the Lattice Boltzmann Method as a numeric
 
 
 Requirements:
-- Python 3.7+
-- NumPy
-- Matplotlib
+Python 3.7+, NumPy, Matplotlib
 
 File Structure:
-
 CodeFD/
 ├── parameters.py                 # Physical and numerical parameters
 ├── lattice_boltzmann.py          # Core LBM solver class
@@ -28,7 +25,6 @@ CodeFD/
 
 
 Simulation Parameters:
-
 Domain size : 300 × 62 lattice nodes 
 Relaxation time (τ) : 0.8 
 Kinematic viscosity (ν) : 0.1 
@@ -36,8 +32,8 @@ Convergence tolerance : 1×10⁻⁶
 Max time steps : 10,000 
 
 Authors: 
-Kenneth Steve Diyya (127799)
-Sai Pranay Unnam (126722)
+Kenneth Steve Diyya 
+Sai Pranay Unnam 
 
 Supervisors: Prof. Dr. rer. nat. Björn Rüffer, Dr. Natalia Gorban, M.Sc. Tighana Wenge Basele
 
